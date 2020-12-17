@@ -5,3 +5,5 @@ Small Rust application to create bloom filter of optimal size given a false posi
 ## Usage
 
     ./create-bloom-filter INFILE OUTFILE FALSE_POSITIVE_RATE
+
+INFILE should be one line per entry
