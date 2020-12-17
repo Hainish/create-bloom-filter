@@ -3,6 +3,13 @@ name = "create-bloom-filter"
 version = "0.1.0"
 authors = ["William Budington <bill@eff.org>"]
 edition = "2018"
+license = "GPL-3.0"
+description = "Small Rust application to create bloom filter of optimal size given a false positivity rate"
+readme = "README.md"
+homepage = "https://github.com/Hainish/create-bloom-filter"
+repository = "https://github.com/Hainish/create-bloom-filter"
+keywords = ["cli", "bloom-filter", "bloom"]
+categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
