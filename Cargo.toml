@@ -16,3 +16,6 @@ categories = ["command-line-utilities"]
 [dependencies]
 bloomfilter = "1.0"
 linecount = "0.1.0"
+serde_json = "1.0"
+ring = "0.16"
+hex = "0.4"

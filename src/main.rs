@@ -1,5 +1,7 @@
 use bloomfilter::Bloom;
 use linecount::count_lines;
+use serde_json::{json, Value};
+use ring::digest;
 use std::env;
 use std::fs::File;
 use std::io::{BufReader, BufRead, BufWriter, Write, Seek, SeekFrom};
@@ -21,10 +23,10 @@ fn open_file_count_lines(file_name: &str, program_name: &str) -> (usize, File) {
     (lines, f)
 }
 
-fn create_outfile(file_name: &str, program_name: &str) -> File {
+fn create_file(file_name: &str, program_name: &str, file_summary: &str) -> File {
     let of = File::create(file_name);
     if let Err(ref e) = of {
-        println!("Error creating OUTFILE: {}", e);
+        println!("Error creating {}: {}", e, file_summary);
         help_message_and_exit(program_name, 1);
     };
     of.unwrap()
@@ -54,20 +56,33 @@ fn write_outfile(bf: &Bloom<str>, outfile: File) {
     bw.write_all(&bf.bitmap()).unwrap();
 }
 
+fn write_metadata(json_value: Value, mut metadata_file: File) {
+    metadata_file.write_all(json_value.to_string().as_bytes()).unwrap();
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 4 {
         help_message_and_exit(&args[0], 1);
     }
     let fp_rate = parse_fp_rate(&args[3], &args[0]);
-    let outfile = create_outfile(&args[2], &args[0]);
+    let outfile = create_file(&args[2], &args[0], "OUTFILE");
+    let metadata_file = create_file(&format!("{}.json", &args[2]), &args[0], "metadata file OUTFILE.json");
     let (items_count, infile) = open_file_count_lines(&args[1], &args[0]);
 
     let bf = create_bloom_filter(infile, items_count, fp_rate);
 
     println!("Writing bloom filter to file...");
     write_outfile(&bf, outfile);
-    println!("Filter number of bits: {}", bf.number_of_bits());
-    println!("Filter number of hash functions: {:?}", bf.number_of_hash_functions());
-    println!("Filter sip keys: {:?}", bf.sip_keys());
+    let sip_keys = bf.sip_keys();
+    let json = json!({
+        "sha256sum": hex::encode(digest::digest(&digest::SHA256, &bf.bitmap()).as_ref()),
+        "bitmap_bits": bf.number_of_bits(),
+        "k_num": bf.number_of_hash_functions(),
+        "sip_keys": [
+            [sip_keys[0].0, sip_keys[0].1],
+            [sip_keys[1].0, sip_keys[1].1],
+        ]
+    });
+    write_metadata(json, metadata_file);
 }
