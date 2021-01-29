@@ -80,8 +80,8 @@ fn main() {
         "bitmap_bits": bf.number_of_bits(),
         "k_num": bf.number_of_hash_functions(),
         "sip_keys": [
-            [sip_keys[0].0, sip_keys[0].1],
-            [sip_keys[1].0, sip_keys[1].1],
+            [sip_keys[0].0.to_string(), sip_keys[0].1.to_string()],
+            [sip_keys[1].0.to_string(), sip_keys[1].1.to_string()],
         ]
     });
     write_metadata(json, metadata_file);
